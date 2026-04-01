@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -60,16 +59,10 @@
   }
 }
 
-.parallax-container {
-  height: 300vh; /* Enough height for scrolling sequences */
-}
-
-.sticky-hero {
-  position: sticky;
-  top: 0;
+.hero-container {
   height: 100vh;
   width: 100%;
-  overflow: hidden;
+  position: relative;
 }
 
 .canvas-wrapper {
