@@ -1,0 +1,29 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "cherry-soda",
+      "description": "Cherry Soda Variant",
+      "imageUrl": "https://picsum.photos/seed/cherry/1200/800",
+      "imageHint": "cherry soda can"
+    },
+    {
+      "id": "grape-soda",
+      "description": "Grape Soda Variant",
+      "imageUrl": "https://picsum.photos/seed/grape/1200/800",
+      "imageHint": "grape soda can"
+    },
+    {
+      "id": "lemon-ginger-soda",
+      "description": "Lemon Ginger Soda Variant",
+      "imageUrl": "https://picsum.photos/seed/lemon/1200/800",
+      "imageHint": "lemon ginger soda can"
+    },
+    {
+      "id": "product-ingredients",
+      "description": "Natural ingredients",
+      "imageUrl": "https://picsum.photos/seed/ingredients/800/600",
+      "imageHint": "natural fruits ingredients"
+    }
+  ]
+}
