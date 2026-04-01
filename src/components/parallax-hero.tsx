@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { DrinkVariant } from "@/types/drink";
 import { Button } from "@/components/ui/button";
 import { Twitter, Instagram, Facebook, ArrowUpRight, ArrowDown, ChevronUp, ChevronDown } from "lucide-react";
@@ -20,6 +20,14 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
   const frameIdRef = useRef<number>(0);
   const [loading, setLoading] = useState(true);
 
+  // Pre-calculated drawing properties to avoid math in the render loop
+  const drawPropsRef = useRef({
+    offsetX: 0,
+    offsetY: 0,
+    width: 0,
+    height: 0
+  });
+
   // Update theme color globally
   useEffect(() => {
     document.documentElement.style.setProperty('--accent', activeVariant.themeColor);
@@ -38,18 +46,18 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
       const img = new Image();
       const frameNum = i.toString().padStart(4, '0');
       img.src = `${base}frame_${frameNum}.webp`;
-      img.onload = () => {
+      
+      const onImageLoad = () => {
         loadedCount++;
         if (loadedCount === activeVariant.frameCount) {
           setLoading(false);
+          // Initial sizing once we have image dimensions
+          updateDrawProps(img.width, img.height);
         }
       };
-      img.onerror = () => {
-        loadedCount++;
-        if (loadedCount === activeVariant.frameCount) {
-          setLoading(false);
-        }
-      };
+
+      img.onload = onImageLoad;
+      img.onerror = onImageLoad; // Count as loaded to avoid getting stuck
       images.push(img);
     }
     imagesRef.current = images;
@@ -60,34 +68,45 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     };
   }, [activeVariant]);
 
-  const renderFrame = (frameIndex: number) => {
+  const updateDrawProps = (imgWidth: number, imgHeight: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas || !imgWidth) return;
+
+    const hRatio = canvas.width / imgWidth;
+    const vRatio = canvas.height / imgHeight;
+    const ratio = Math.max(hRatio, vRatio);
+    
+    drawPropsRef.current = {
+      width: imgWidth * ratio,
+      height: imgHeight * ratio,
+      offsetX: (canvas.width - imgWidth * ratio) / 2,
+      offsetY: (canvas.height - imgHeight * ratio) / 2
+    };
+  };
+
+  const renderFrame = useCallback((frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas || imagesRef.current.length === 0) return;
+    
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
     const currentFrame = frameIndex % activeVariant.frameCount;
     const img = imagesRef.current[currentFrame];
     
-    if (img && img.complete) {
-      const hRatio = canvas.width / img.width;
-      const vRatio = canvas.height / img.height;
-      const ratio = Math.max(hRatio, vRatio);
-      const centerShift_x = (canvas.width - img.width * ratio) / 2;
-      const centerShift_y = (canvas.height - img.height * ratio) / 2;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Only draw if image is fully decoded to prevent flicker
+    if (img && img.complete && img.naturalWidth > 0) {
+      const { offsetX, offsetY, width, height } = drawPropsRef.current;
+      
+      // We don't clear the canvas because we're drawing a full-screen opaque image
+      // This eliminates the "white flash" jitter
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(
-        img, 
-        0, 0, img.width, img.height,
-        centerShift_x, centerShift_y, img.width * ratio, img.height * ratio
-      );
+      ctx.drawImage(img, offsetX, offsetY, width, height);
     }
-  };
+  }, [activeVariant.frameCount]);
 
-  // Smooth Loop Animation
+  // Optimized Loop Animation
   useEffect(() => {
     if (loading || imagesRef.current.length === 0) return;
 
@@ -108,7 +127,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     return () => {
       if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
     };
-  }, [loading, activeVariant]);
+  }, [loading, renderFrame]);
 
   // Handle canvas sizing for High DPI displays
   useEffect(() => {
@@ -123,7 +142,11 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         canvasRef.current.style.width = `${width}px`;
         canvasRef.current.style.height = `${height}px`;
         
-        // Immediate render first frame to prevent flicker on resize
+        // Update draw props immediately on resize
+        if (imagesRef.current[0]) {
+          updateDrawProps(imagesRef.current[0].width, imagesRef.current[0].height);
+        }
+        
         renderFrame(0);
       }
     };
@@ -131,13 +154,13 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     return () => window.removeEventListener("resize", resizeCanvas);
-  }, [activeVariant]);
+  }, [renderFrame]);
 
   return (
     <section ref={containerRef} className="hero-container relative h-screen overflow-hidden">
       <div className="absolute inset-0 z-0">
         <div className="canvas-wrapper bg-[#0f1113]">
-          <canvas ref={canvasRef} />
+          <canvas ref={canvasRef} className="block w-full h-full" />
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
@@ -172,50 +195,50 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         </div>
       </div>
 
-      {/* Side Navigation controls */}
+      {/* Side Navigation controls - Enhanced Visibility */}
       <div className="absolute right-8 md:right-16 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-10">
         <div className="flex flex-col items-center">
-          <span className="text-7xl md:text-9xl font-headline font-bold tabular-nums text-white/50 select-none tracking-tighter">
+          <span className="text-7xl md:text-9xl font-headline font-bold tabular-nums text-white/50 select-none tracking-tighter drop-shadow-2xl">
             {(index + 1).toString().padStart(2, '0')}
           </span>
         </div>
 
-        <div className="flex flex-col items-center gap-6 p-4 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
+        <div className="flex flex-col items-center gap-6 p-6 rounded-full bg-black/40 backdrop-blur-xl border border-white/20 shadow-2xl">
            <button 
             onClick={onPrev}
             className="group flex flex-col items-center gap-1 transition-transform hover:-translate-y-1 active:scale-95 pointer-events-auto"
           >
-            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-white/80 group-hover:text-accent transition-colors">PREV</span>
-            <ChevronUp className="w-6 h-6 text-white/80 group-hover:text-accent transition-colors" />
+            <span className="text-xs uppercase font-black tracking-[0.3em] text-white group-hover:text-accent transition-colors">PREV</span>
+            <ChevronUp className="w-8 h-8 text-white group-hover:text-accent transition-colors stroke-[3]" />
           </button>
           
-          <div className="w-[1px] h-16 bg-white/20" />
+          <div className="w-[2px] h-16 bg-white/20" />
           
           <button 
             onClick={onNext}
             className="group flex flex-col items-center gap-1 transition-transform hover:translate-y-1 active:scale-95 pointer-events-auto"
           >
-            <ChevronDown className="w-6 h-6 text-white/80 group-hover:text-accent transition-colors" />
-            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-white/80 group-hover:text-accent transition-colors">NEXT</span>
+            <ChevronDown className="w-8 h-8 text-white group-hover:text-accent transition-colors stroke-[3]" />
+            <span className="text-xs uppercase font-black tracking-[0.3em] text-white group-hover:text-accent transition-colors">NEXT</span>
           </button>
         </div>
         
-        <div className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30 vertical-text h-32 flex items-center">
+        <div className="text-[10px] font-black uppercase tracking-[0.5em] text-white/40 vertical-text h-32 flex items-center">
           <span className="rotate-90">EXPLORE</span>
         </div>
       </div>
 
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex gap-8">
         {[Twitter, Instagram, Facebook].map((Icon, i) => (
-          <a key={i} href="#" className="text-white/30 hover:text-accent transition-colors">
-            <Icon className="w-5 h-5" />
+          <a key={i} href="#" className="text-white/40 hover:text-accent transition-colors">
+            <Icon className="w-6 h-6" />
           </a>
         ))}
       </div>
 
-      <div className="absolute bottom-12 left-12 flex items-center gap-4 text-white/30 animate-bounce">
-         <ArrowDown className="w-4 h-4" />
-         <span className="text-[10px] uppercase font-bold tracking-widest">Scroll to explore</span>
+      <div className="absolute bottom-12 left-12 flex items-center gap-4 text-white/40 animate-bounce">
+         <ArrowDown className="w-5 h-5" />
+         <span className="text-xs uppercase font-bold tracking-widest">Scroll to explore</span>
       </div>
     </section>
   );
