@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -173,29 +172,36 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         </div>
       </div>
 
-      <div className="absolute right-12 top-1/2 -translate-y-1/2 z-30 flex flex-col items-end gap-12">
+      {/* Side Navigation controls */}
+      <div className="absolute right-8 md:right-16 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-10">
         <div className="flex flex-col items-center">
-          <span className="text-7xl font-headline font-bold tabular-nums text-white/20 select-none">
+          <span className="text-7xl md:text-9xl font-headline font-bold tabular-nums text-white/50 select-none tracking-tighter">
             {(index + 1).toString().padStart(2, '0')}
           </span>
         </div>
 
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-6 p-4 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
            <button 
             onClick={onPrev}
-            className="group flex flex-col items-center gap-1 transition-transform hover:-translate-y-1 active:scale-95"
+            className="group flex flex-col items-center gap-1 transition-transform hover:-translate-y-1 active:scale-95 pointer-events-auto"
           >
-            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-white/40 group-hover:text-accent">PREV</span>
-            <ChevronUp className="w-5 h-5 text-white/40 group-hover:text-accent" />
+            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-white/80 group-hover:text-accent transition-colors">PREV</span>
+            <ChevronUp className="w-6 h-6 text-white/80 group-hover:text-accent transition-colors" />
           </button>
-          <div className="w-[1px] h-24 bg-white/10" />
+          
+          <div className="w-[1px] h-16 bg-white/20" />
+          
           <button 
             onClick={onNext}
-            className="group flex flex-col items-center gap-1 transition-transform hover:translate-y-1 active:scale-95"
+            className="group flex flex-col items-center gap-1 transition-transform hover:translate-y-1 active:scale-95 pointer-events-auto"
           >
-            <ChevronDown className="w-5 h-5 text-white/40 group-hover:text-accent" />
-            <span className="text-[10px] uppercase font-bold tracking-[0.3em] text-white/40 group-hover:text-accent">NEXT</span>
+            <ChevronDown className="w-6 h-6 text-white/80 group-hover:text-accent transition-colors" />
+            <span className="text-[10px] uppercase font-black tracking-[0.3em] text-white/80 group-hover:text-accent transition-colors">NEXT</span>
           </button>
+        </div>
+        
+        <div className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30 vertical-text h-32 flex items-center">
+          <span className="rotate-90">EXPLORE</span>
         </div>
       </div>
 
