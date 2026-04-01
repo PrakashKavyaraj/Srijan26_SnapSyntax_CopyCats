@@ -43,8 +43,6 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         loadedCount++;
         if (loadedCount === activeVariant.frameCount) {
           setLoading(false);
-          // Initial render on next tick
-          requestAnimationFrame(() => renderFrame(0));
         }
       };
       img.onerror = () => {
@@ -69,27 +67,34 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    const img = imagesRef.current[frameIndex % activeVariant.frameCount];
+    const currentFrame = frameIndex % activeVariant.frameCount;
+    const img = imagesRef.current[currentFrame];
+    
     if (img && img.complete) {
-      const ratio = Math.max(canvas.width / img.width, canvas.height / img.height);
-      const w = img.width * ratio;
-      const h = img.height * ratio;
-      const x = (canvas.width - w) / 2;
-      const y = (canvas.height - h) / 2;
-      
+      const hRatio = canvas.width / img.width;
+      const vRatio = canvas.height / img.height;
+      const ratio = Math.max(hRatio, vRatio);
+      const centerShift_x = (canvas.width - img.width * ratio) / 2;
+      const centerShift_y = (canvas.height - img.height * ratio) / 2;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, x, y, w, h);
+      ctx.drawImage(
+        img, 
+        0, 0, img.width, img.height,
+        centerShift_x, centerShift_y, img.width * ratio, img.height * ratio
+      );
     }
   };
 
-  // Automatic Animation Loop
+  // Smooth Loop Animation
   useEffect(() => {
     if (loading || imagesRef.current.length === 0) return;
 
+    let startTime = performance.now();
     const fps = 30;
     const interval = 1000 / fps;
-    let startTime = performance.now();
 
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
@@ -106,18 +111,24 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     };
   }, [loading, activeVariant]);
 
-  // Handle canvas sizing and responsiveness
+  // Handle canvas sizing for High DPI displays
   useEffect(() => {
     const resizeCanvas = () => {
       if (canvasRef.current) {
         const dpr = window.devicePixelRatio || 1;
-        canvasRef.current.width = window.innerWidth * dpr;
-        canvasRef.current.height = window.innerHeight * dpr;
-        canvasRef.current.style.width = `${window.innerWidth}px`;
-        canvasRef.current.style.height = `${window.innerHeight}px`;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        canvasRef.current.width = width * dpr;
+        canvasRef.current.height = height * dpr;
+        canvasRef.current.style.width = `${width}px`;
+        canvasRef.current.style.height = `${height}px`;
+        
+        // Immediate render first frame to prevent flicker on resize
         renderFrame(0);
       }
     };
+
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
     return () => window.removeEventListener("resize", resizeCanvas);
@@ -136,7 +147,6 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         </div>
       </div>
 
-      {/* Hero Overlay Content */}
       <div className="relative z-20 h-full w-full pointer-events-none px-12 md:px-24 flex items-center">
         <div className="max-w-xl animate-fade-in-up pointer-events-auto">
           <div className="mb-4">
@@ -153,8 +163,8 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
           </p>
 
           <div className="flex gap-4">
-            <Button size="lg" className="rounded-full px-12 bg-transparent border-2 border-white hover:bg-white hover:text-black transition-all font-bold">
-              ADD TO
+            <Button size="lg" className="rounded-full px-12 bg-white text-black hover:bg-accent hover:text-white border-2 border-transparent transition-all font-bold">
+              ORDERS
             </Button>
             <Button size="lg" className="rounded-full px-12 bg-white text-black hover:bg-accent hover:text-white border-2 border-transparent transition-all font-bold">
               CART <ArrowUpRight className="ml-2 w-4 h-4" />
@@ -163,7 +173,6 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         </div>
       </div>
 
-      {/* Right Side Variant Navigation */}
       <div className="absolute right-12 top-1/2 -translate-y-1/2 z-30 flex flex-col items-end gap-12">
         <div className="flex flex-col items-center">
           <span className="text-7xl font-headline font-bold tabular-nums text-white/20 select-none">
@@ -190,7 +199,6 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         </div>
       </div>
 
-      {/* Social Icons Bottom Center */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 flex gap-8">
         {[Twitter, Instagram, Facebook].map((Icon, i) => (
           <a key={i} href="#" className="text-white/30 hover:text-accent transition-colors">
@@ -199,7 +207,6 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         ))}
       </div>
 
-      {/* Scroll Indicator */}
       <div className="absolute bottom-12 left-12 flex items-center gap-4 text-white/30 animate-bounce">
          <ArrowDown className="w-4 h-4" />
          <span className="text-[10px] uppercase font-bold tracking-widest">Scroll to explore</span>
