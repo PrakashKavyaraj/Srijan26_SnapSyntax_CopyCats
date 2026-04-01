@@ -20,7 +20,7 @@ const variants: DrinkVariant[] = [
     description: "A modern take on a classic soda with a perfect blend of sweet and tart, full of nostalgic flavor.",
     themeColor: "350 78% 55%", // Cherry Red
     sequencePath: "https://omqaodalyvzbrvckcumi.supabase.co/storage/v1/object/public/assets/soda/frame_0001.webp",
-    frameCount: 240
+    frameCount: 200
   },
   {
     id: "grape",
@@ -29,7 +29,7 @@ const variants: DrinkVariant[] = [
     description: "A functional soda inspired by classic flavors but made with better ingredients. Bold, juicy, and refined.",
     themeColor: "282 44% 47%", // Grape Purple
     sequencePath: "https://omqaodalyvzbrvckcumi.supabase.co/storage/v1/object/public/assets/soda2/frame_0001.webp",
-    frameCount: 240
+    frameCount: 200
   },
   {
     id: "lemon",
@@ -38,7 +38,7 @@ const variants: DrinkVariant[] = [
     description: "Bright and refreshing citrus soda with natural lemon spark and crisp bubbles. A zingy functional delight.",
     themeColor: "45 93% 47%", // Lemon Yellow
     sequencePath: "https://omqaodalyvzbrvckcumi.supabase.co/storage/v1/object/public/assets/soda3/frame_0001.webp",
-    frameCount: 240
+    frameCount: 200
   }
 ];
 
@@ -59,6 +59,10 @@ export default function Home() {
       img.src = `${base}frame_${frameNum}.webp`;
       img.onload = () => {
         loaded++;
+        setLoadProgress((loaded / activeVariant.frameCount) * 100);
+      };
+      img.onerror = () => {
+        loaded++; // Count as loaded even if error to prevent getting stuck
         setLoadProgress((loaded / activeVariant.frameCount) * 100);
       };
     }
@@ -156,7 +160,7 @@ export default function Home() {
             </div>
             <div className="relative z-10 max-w-2xl">
               <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase mb-8">Ready for a <span className="text-black">New Era</span> of Soda?</h2>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                  <button className="bg-black text-white px-12 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
                   Shop All Flavors
                  </button>
