@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -17,6 +18,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
+  const frameIdRef = useRef<number>(0);
   const [loading, setLoading] = useState(true);
 
   // Update theme color globally
@@ -41,7 +43,8 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         loadedCount++;
         if (loadedCount === activeVariant.frameCount) {
           setLoading(false);
-          renderFrame(0);
+          // Initial render on next tick
+          requestAnimationFrame(() => renderFrame(0));
         }
       };
       img.onerror = () => {
@@ -56,23 +59,27 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
 
     return () => {
       imagesRef.current = [];
+      if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
     };
   }, [activeVariant]);
 
   const renderFrame = (frameIndex: number) => {
     const canvas = canvasRef.current;
     if (!canvas || imagesRef.current.length === 0) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
     const img = imagesRef.current[frameIndex % activeVariant.frameCount];
     if (img && img.complete) {
-      // Clean canvas and draw image centered and filling
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
       const ratio = Math.max(canvas.width / img.width, canvas.height / img.height);
-      const x = (canvas.width - img.width * ratio) / 2;
-      const y = (canvas.height - img.height * ratio) / 2;
-      ctx.drawImage(img, x, y, img.width * ratio, img.height * ratio);
+      const w = img.width * ratio;
+      const h = img.height * ratio;
+      const x = (canvas.width - w) / 2;
+      const y = (canvas.height - h) / 2;
+      
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, x, y, w, h);
     }
   };
 
@@ -80,33 +87,34 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
   useEffect(() => {
     if (loading || imagesRef.current.length === 0) return;
 
-    let frameId: number;
-    let currentFrame = 0;
-    
-    // We target roughly 30fps for a smooth but not too heavy loop
-    let lastTime = 0;
     const fps = 30;
     const interval = 1000 / fps;
+    let startTime = performance.now();
 
-    const animate = (time: number) => {
-      if (time - lastTime >= interval) {
-        currentFrame++;
-        renderFrame(currentFrame);
-        lastTime = time;
-      }
-      frameId = requestAnimationFrame(animate);
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const frameIndex = Math.floor(elapsed / interval);
+      
+      renderFrame(frameIndex);
+      
+      frameIdRef.current = requestAnimationFrame(animate);
     };
 
-    frameId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameId);
+    frameIdRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
+    };
   }, [loading, activeVariant]);
 
-  // Handle canvas sizing
+  // Handle canvas sizing and responsiveness
   useEffect(() => {
     const resizeCanvas = () => {
       if (canvasRef.current) {
-        canvasRef.current.width = window.innerWidth;
-        canvasRef.current.height = window.innerHeight;
+        const dpr = window.devicePixelRatio || 1;
+        canvasRef.current.width = window.innerWidth * dpr;
+        canvasRef.current.height = window.innerHeight * dpr;
+        canvasRef.current.style.width = `${window.innerWidth}px`;
+        canvasRef.current.style.height = `${window.innerHeight}px`;
         renderFrame(0);
       }
     };
