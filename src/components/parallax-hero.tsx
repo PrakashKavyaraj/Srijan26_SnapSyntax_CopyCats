@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -174,7 +173,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Button size="lg" className="rounded-full w-full sm:w-auto px-12 bg-white text-black hover:bg-accent hover:text-white border-2 border-transparent transition-all font-bold">
-              ORDERS
+              TRY IT NOW
             </Button>
             <Button size="lg" className="rounded-full w-full sm:w-auto px-12 bg-white text-black hover:bg-accent hover:text-white border-2 border-transparent transition-all font-bold">
               CART <ArrowUpRight className="ml-2 w-4 h-4" />
