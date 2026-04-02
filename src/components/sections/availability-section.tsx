@@ -27,7 +27,7 @@ export function AvailabilitySection() {
               key={i} 
               className="flex items-center gap-12 md:gap-24"
             >
-              <span className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-white/40 transition-colors hover:text-accent duration-500 cursor-default">
+              <span className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-white/60 transition-colors hover:text-accent duration-500 cursor-default">
                 {city}
               </span>
               <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-accent" />
@@ -37,8 +37,10 @@ export function AvailabilitySection() {
       </div>
       
       {/* Visual background element */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.02] pointer-events-none">
-        <div className="text-[20rem] md:text-[30rem] font-bold text-center leading-none">INDIA</div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.08] pointer-events-none flex items-center justify-center">
+        <div className="text-[20rem] md:text-[35rem] font-bold text-center leading-none text-accent select-none">
+          INDIA
+        </div>
       </div>
     </section>
   );
