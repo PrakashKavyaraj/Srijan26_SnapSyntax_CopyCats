@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +7,7 @@ import { ParallaxHero } from "@/components/parallax-hero";
 import { LoadingScreen } from "@/components/loading-screen";
 import { ProductSection } from "@/components/sections/product-section";
 import { NutritionSection } from "@/components/sections/nutrition-section";
+import { AvailabilitySection } from "@/components/sections/availability-section";
 import { ReviewsSection } from "@/components/sections/reviews-section";
 import { Footer } from "@/components/footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -126,6 +126,9 @@ export default function Home() {
           </section>
 
           <NutritionSection />
+          
+          <AvailabilitySection />
+
           <ReviewsSection />
 
           <section id="faq" className="py-24 px-6 md:px-24 bg-secondary">
