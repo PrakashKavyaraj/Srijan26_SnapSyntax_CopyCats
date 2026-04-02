@@ -6,7 +6,6 @@ import Image from "next/image";
 import { DrinkVariant } from "@/types/drink";
 import { generateProductImage } from "@/ai/flows/generate-product-image";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
 
 interface ProductSectionProps {
   drink: DrinkVariant;
@@ -58,7 +57,6 @@ export function ProductSection({ drink }: ProductSectionProps) {
           
           <Button onClick={handleGenerate} disabled={isGenerating} variant="outline" className="w-full sm:w-auto rounded-full py-6 px-8 border-accent text-accent hover:bg-accent hover:text-white transition-all">
             {isGenerating ? "Processing AI Visual..." : "Generate AI Lifestyle Shot"}
-            <Sparkles className="ml-2 w-4 h-4" />
           </Button>
         </div>
 
@@ -71,7 +69,6 @@ export function ProductSection({ drink }: ProductSectionProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 right-4 md:right-8 text-white">
-            <p className="text-[10px] font-mono uppercase tracking-[0.3em] mb-1 md:mb-2 opacity-60">Visual Mockup</p>
             <h3 className="text-xl md:text-2xl font-bold tracking-tight">{drink.name} Variant - Functional Studio Shot</h3>
           </div>
         </div>
