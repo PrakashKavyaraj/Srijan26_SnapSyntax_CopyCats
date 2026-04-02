@@ -42,6 +42,49 @@ const variants: DrinkVariant[] = [
   }
 ];
 
+const faqs = [
+  {
+    question: "What is Olipop?",
+    answer: "Olipop is a new kind of soda that combines great taste with functional ingredients to support digestive health."
+  },
+  {
+    question: "Is Olipop healthy?",
+    answer: "Yes! Olipop contains prebiotics, plant fiber, and botanical extracts that help support gut health while being low in sugar."
+  },
+  {
+    question: "Does it taste like regular soda?",
+    answer: "Absolutely. Olipop is designed to taste just like your favorite classic sodas—just without the unhealthy ingredients."
+  },
+  {
+    question: "How much sugar does it contain?",
+    answer: "Olipop contains significantly less sugar compared to traditional soft drinks, making it a healthier alternative."
+  },
+  {
+    question: "What flavors are available?",
+    answer: "We offer a variety of delicious flavors like Classic Cola, Strawberry Vanilla, Orange Squeeze, and more."
+  },
+  {
+    question: "Is it safe for daily consumption?",
+    answer: "Yes, Olipop is made with natural ingredients and can be enjoyed daily as part of a balanced lifestyle."
+  },
+  {
+    question: "Does it contain artificial sweeteners or preservatives?",
+    answer: "No, Olipop is free from artificial sweeteners, colors, and preservatives."
+  },
+  {
+    question: "Where can I buy Olipop?",
+    answer: "You can purchase Olipop directly from our website or through select retail stores."
+  },
+  {
+    question: "Is Olipop vegan and gluten-free?",
+    answer: "Yes, Olipop is both vegan-friendly and gluten-free."
+  },
+  {
+    question: "How should I store it?",
+    answer: "For the best taste, store Olipop in a cool, dry place or refrigerate before drinking."
+  }
+];
+
 export default function Home() {
   const [activeVariantIndex, setActiveVariantIndex] = useState(0);
   const [loadProgress, setLoadProgress] = useState(0);
@@ -132,27 +175,17 @@ export default function Home() {
           <ReviewsSection />
 
           <section id="faq" className="py-24 px-6 md:px-24 bg-secondary">
-             <div className="max-w-3xl mx-auto">
+             <div className="max-w-4xl mx-auto">
                 <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-center mb-16">Common <span className="text-accent">Questions</span></h2>
                 <Accordion type="single" collapsible className="space-y-4">
-                  <AccordionItem value="item-1" className="border rounded-2xl px-6 bg-background">
-                    <AccordionTrigger className="text-lg font-bold">What is FlavorVerse?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
-                      FlavorVerse is a functional soda that combines the classic taste of soda with plant-based fiber and prebiotics to support your digestive health.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-2" className="border rounded-2xl px-6 bg-background">
-                    <AccordionTrigger className="text-lg font-bold">How much fiber is in each can?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
-                      Each 12oz can contains 9g of dietary fiber, which is about 32% of your daily recommended intake.
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="item-3" className="border rounded-2xl px-6 bg-background">
-                    <AccordionTrigger className="text-lg font-bold">Is it keto-friendly?</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
-                      Yes! With only 2-5g of net carbs per can, FlavorVerse is a great choice for those on a ketogenic or low-sugar diet.
-                    </AccordionContent>
-                  </AccordionItem>
+                  {faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`item-${index}`} className="border rounded-2xl px-6 bg-background hover:border-accent transition-colors">
+                      <AccordionTrigger className="text-lg font-bold text-left">{faq.question}</AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground text-base pb-6">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
                 </Accordion>
              </div>
           </section>
