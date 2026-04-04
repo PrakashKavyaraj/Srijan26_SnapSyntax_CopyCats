@@ -93,24 +93,27 @@ export default function Home() {
   const [isPreloaded, setIsPreloaded] = useState(false);
   const activeVariant = variants[activeVariantIndex];
 
-  // Preload initial sequence for the first variant
+  // Preload ALL sequences for ALL variants for seamless transitions
   useEffect(() => {
+    let totalFrames = variants.reduce((acc, v) => acc + v.frameCount, 0);
     let loaded = 0;
-    const base = activeVariant.sequencePath.replace('frame_0001.webp', '');
     
-    for (let i = 1; i <= activeVariant.frameCount; i++) {
-      const img = new Image();
-      const frameNum = i.toString().padStart(4, '0');
-      img.src = `${base}frame_${frameNum}.webp`;
-      img.onload = () => {
-        loaded++;
-        setLoadProgress((loaded / activeVariant.frameCount) * 100);
-      };
-      img.onerror = () => {
-        loaded++; // Count as loaded even if error to prevent getting stuck
-        setLoadProgress((loaded / activeVariant.frameCount) * 100);
-      };
-    }
+    variants.forEach(variant => {
+      const base = variant.sequencePath.replace('frame_0001.webp', '');
+      for (let i = 1; i <= variant.frameCount; i++) {
+        const img = new Image();
+        const frameNum = i.toString().padStart(4, '0');
+        img.src = `${base}frame_${frameNum}.webp`;
+        img.onload = () => {
+          loaded++;
+          setLoadProgress((loaded / totalFrames) * 100);
+        };
+        img.onerror = () => {
+          loaded++;
+          setLoadProgress((loaded / totalFrames) * 100);
+        };
+      }
+    });
   }, []);
 
   const nextVariant = () => {

@@ -59,7 +59,6 @@ export function Navbar() {
         <span className="font-headline font-bold text-xl md:text-2xl tracking-tighter text-accent transition-colors duration-1000">FLAVORVERSE</span>
       </div>
 
-      {/* Desktop Links - All now use text-accent for the current active flavor */}
       <div className="hidden md:flex items-center gap-8">
         {navLinks.map((link) => (
           <a
@@ -82,7 +81,6 @@ export function Navbar() {
           {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </Button>
 
-        {/* Mobile Menu */}
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
