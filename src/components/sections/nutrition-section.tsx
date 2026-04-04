@@ -13,8 +13,8 @@ export function NutritionSection() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 items-start">
-          <Card className="p-8 border-4 border-foreground bg-white text-black font-body rounded-none">
-            <h3 className="text-4xl font-bold border-b-8 border-black pb-2 mb-4 leading-none">Nutrition Facts</h3>
+          <Card className="p-8 border-4 border-foreground bg-white text-black font-body rounded-none shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] hover:shadow-accent transition-shadow duration-500">
+            <h3 className="text-4xl font-bold border-b-8 border-accent pb-2 mb-4 leading-none">Nutrition Facts</h3>
             <div className="border-b-2 border-black pb-1 mb-1 font-bold text-sm">1 serving per container</div>
             <div className="flex justify-between items-end border-b-8 border-black pb-1 mb-2">
               <span className="font-bold text-lg">Serving size</span>
@@ -26,7 +26,7 @@ export function NutritionSection() {
               </div>
               <div className="flex justify-between items-baseline leading-none">
                 <span className="text-4xl font-black">Calories</span>
-                <span className="text-4xl font-black">35</span>
+                <span className="text-4xl font-black text-accent">35</span>
               </div>
             </div>
             <div className="space-y-1 text-sm border-b-8 border-black pb-1 mb-1">
@@ -44,7 +44,7 @@ export function NutritionSection() {
               </div>
               <div className="flex justify-between items-center border-b border-black/20 py-1 pl-4">
                 <span>Dietary Fiber 9g</span>
-                <span className="font-bold">32%</span>
+                <span className="font-bold text-accent">32%</span>
               </div>
               <div className="flex justify-between items-center border-b border-black/20 py-1 pl-4">
                 <span>Total Sugars 2g</span>
@@ -63,21 +63,21 @@ export function NutritionSection() {
           </Card>
 
           <div className="space-y-8">
-            <div className="p-8 rounded-3xl bg-background border space-y-4">
+            <div className="p-8 rounded-3xl bg-background border-2 border-transparent hover:border-accent transition-colors duration-500 space-y-4">
               <h4 className="text-xl font-bold uppercase tracking-widest text-accent">OLISMART Blend</h4>
               <p className="text-muted-foreground leading-relaxed">
                 Our proprietary blend of botanicals, plant fibers, and prebiotics is designed to support digestive health and feed your microbiome.
               </p>
               <ul className="grid grid-cols-2 gap-2 text-sm font-medium">
-                <li>• Cassava Root</li>
-                <li>• Chicory Root</li>
-                <li>• Kudzu Root</li>
-                <li>• Jerusalem Artichoke</li>
-                <li>• Nopal Cactus</li>
-                <li>• Marshmallow Root</li>
+                <li className="hover:text-accent transition-colors">• Cassava Root</li>
+                <li className="hover:text-accent transition-colors">• Chicory Root</li>
+                <li className="hover:text-accent transition-colors">• Kudzu Root</li>
+                <li className="hover:text-accent transition-colors">• Jerusalem Artichoke</li>
+                <li className="hover:text-accent transition-colors">• Nopal Cactus</li>
+                <li className="hover:text-accent transition-colors">• Marshmallow Root</li>
               </ul>
             </div>
-            <div className="p-8 rounded-3xl bg-background border space-y-4">
+            <div className="p-8 rounded-3xl bg-background border-2 border-transparent hover:border-accent transition-colors duration-500 space-y-4">
               <h4 className="text-xl font-bold uppercase tracking-widest text-accent">Clean Ingredients</h4>
               <p className="text-muted-foreground leading-relaxed">
                 No high fructose corn syrup. No artificial sweeteners. Just pure, functional ingredients that taste like a celebration in every sip.

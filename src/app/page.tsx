@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,6 +12,7 @@ import { AvailabilitySection } from "@/components/sections/availability-section"
 import { ReviewsSection } from "@/components/sections/reviews-section";
 import { Footer } from "@/components/footer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { CheckCircle2 } from "lucide-react";
 
 const variants: DrinkVariant[] = [
   {
@@ -137,17 +139,18 @@ export default function Home() {
 
           <ProductSection drink={activeVariant} />
 
-          <section id="ingredients" className="py-24 px-6 md:px-24 bg-card">
+          <section id="ingredients" className="py-24 px-6 md:px-24 bg-card border-y border-border/50">
             <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="order-2 md:order-1 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl">
+              <div className="order-2 md:order-1 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl group">
                  <img 
                    src="https://picsum.photos/seed/ingredients-shot/800/600" 
                    alt="Natural ingredients"
-                   className="object-cover w-full h-full"
+                   className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-110"
                  />
+                 <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               </div>
               <div className="order-1 md:order-2 space-y-8">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">Rooted in <span className="text-accent">Nature</span></h2>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase leading-none">Rooted in <span className="text-accent transition-colors duration-500">Nature</span></h2>
                 <p className="text-xl text-muted-foreground leading-relaxed">
                   We spent years working with leading microbiologists and digestive health experts to craft a functional soda that's actually good for you.
                 </p>
@@ -158,9 +161,9 @@ export default function Home() {
                     "Prebiotics to support your gut microbiome",
                     "Non-GMO and Gluten-Free certified"
                   ].map((item, i) => (
-                    <div key={i} className="flex items-center gap-4 text-lg font-medium">
-                      <div className="w-2 h-2 rounded-full bg-accent" />
-                      <span>{item}</span>
+                    <div key={i} className="flex items-center gap-4 text-lg font-medium group cursor-default">
+                      <CheckCircle2 className="w-6 h-6 text-accent transition-colors duration-500" />
+                      <span className="group-hover:text-accent transition-colors">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -176,11 +179,11 @@ export default function Home() {
 
           <section id="faq" className="py-24 px-6 md:px-24 bg-secondary">
              <div className="max-w-4xl mx-auto">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-center mb-16">Common <span className="text-accent">Questions</span></h2>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-center mb-16">Common <span className="text-accent transition-colors duration-500">Questions</span></h2>
                 <Accordion type="single" collapsible className="space-y-4">
                   {faqs.map((faq, index) => (
-                    <AccordionItem key={index} value={`item-${index}`} className="border rounded-2xl px-6 bg-background hover:border-accent transition-colors">
-                      <AccordionTrigger className="text-lg font-bold text-left">{faq.question}</AccordionTrigger>
+                    <AccordionItem key={index} value={`item-${index}`} className="border-2 rounded-2xl px-6 bg-background hover:border-accent transition-all duration-300">
+                      <AccordionTrigger className="text-lg font-bold text-left hover:text-accent hover:no-underline">{faq.question}</AccordionTrigger>
                       <AccordionContent className="text-muted-foreground text-base pb-6">
                         {faq.answer}
                       </AccordionContent>
@@ -190,14 +193,14 @@ export default function Home() {
              </div>
           </section>
 
-          <section className="py-24 px-6 md:px-24 bg-accent text-white overflow-hidden relative">
+          <section className="py-24 px-6 md:px-24 bg-accent text-white overflow-hidden relative transition-colors duration-1000">
             <div className="absolute top-0 right-0 w-1/3 h-full opacity-10 pointer-events-none">
               <h1 className="text-[20rem] font-bold rotate-90 leading-none">FLAVOR</h1>
             </div>
             <div className="relative z-10 max-w-2xl">
-              <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase mb-8">Ready for a <span className="text-black">New Era</span> of Soda?</h2>
+              <h2 className="text-5xl md:text-8xl font-bold tracking-tighter uppercase mb-8 leading-none">Ready for a <span className="text-black">New Era</span> of Soda?</h2>
               <div className="flex flex-wrap gap-4">
-                 <button className="bg-black text-white px-12 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all">
+                 <button className="bg-black text-white px-12 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-xl">
                   Shop All Flavors
                  </button>
                  <button className="border-2 border-white text-white px-12 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-white hover:text-accent transition-all">
