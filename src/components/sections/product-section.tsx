@@ -1,11 +1,13 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { DrinkVariant } from "@/types/drink";
 import { generateProductImage } from "@/ai/flows/generate-product-image";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Camera } from "lucide-react";
 
 interface ProductSectionProps {
   drink: DrinkVariant;
@@ -14,18 +16,35 @@ interface ProductSectionProps {
 export function ProductSection({ drink }: ProductSectionProps) {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
 
   const handleGenerate = async () => {
     setIsGenerating(true);
+    toast({
+      title: "AI Studio Initialized",
+      description: `Generating a custom lifestyle shot for ${drink.name}...`,
+    });
+
     try {
       const result = await generateProductImage({
         drinkName: `${drink.name} ${drink.subtitle}`,
         drinkColor: drink.themeColor,
         drinkDescription: drink.description
       });
+      
       setGeneratedImage(result.imageUrl);
-    } catch (error) {
+      
+      toast({
+        title: "Generation Successful",
+        description: "Your custom lifestyle shot is ready.",
+      });
+    } catch (error: any) {
       console.error("AI Generation failed:", error);
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: "Please check your API key configuration in the .env file.",
+      });
     } finally {
       setIsGenerating(false);
     }
@@ -55,21 +74,42 @@ export function ProductSection({ drink }: ProductSectionProps) {
             </div>
           </div>
           
-          <Button onClick={handleGenerate} disabled={isGenerating} variant="outline" className="w-full sm:w-auto rounded-full py-6 px-8 border-accent text-accent hover:bg-accent hover:text-white transition-all">
-            {isGenerating ? "Processing AI Visual..." : "Generate AI Lifestyle Shot"}
+          <Button 
+            onClick={handleGenerate} 
+            disabled={isGenerating} 
+            className="w-full sm:w-auto rounded-full py-7 px-10 bg-accent text-white hover:opacity-90 transition-all font-bold tracking-widest uppercase shadow-xl hover:shadow-accent/20"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Processing AI Visual...
+              </>
+            ) : (
+              <>
+                <Camera className="mr-2 h-5 w-5" />
+                Generate AI Lifestyle Shot
+              </>
+            )}
           </Button>
         </div>
 
-        <div className="relative aspect-square rounded-3xl overflow-hidden border-4 md:border-8 border-card shadow-2xl bg-muted group">
+        <div className="relative aspect-square rounded-[2.5rem] overflow-hidden border-4 md:border-8 border-card shadow-2xl bg-muted group">
           <Image
-            src={generatedImage || `https://picsum.photos/seed/${drink.name}/800/800`}
+            src={generatedImage || `https://picsum.photos/seed/${drink.name}/1000/1000`}
             alt={drink.name}
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-105"
+            priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8 right-4 md:right-8 text-white">
-            <h3 className="text-xl md:text-2xl font-bold tracking-tight">{drink.name} Variant - Functional Studio Shot</h3>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+          <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 right-6 md:right-10 text-white">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="px-2 py-0.5 rounded bg-accent/90 text-[10px] font-black tracking-widest uppercase">
+                {generatedImage ? 'AI Generated' : 'Reference Shot'}
+              </div>
+            </div>
+            <h3 className="text-xl md:text-3xl font-bold tracking-tight uppercase leading-none">{drink.name} Variant</h3>
+            <p className="text-sm text-white/60 mt-2 font-medium tracking-wide">Functional Studio Session</p>
           </div>
         </div>
       </div>

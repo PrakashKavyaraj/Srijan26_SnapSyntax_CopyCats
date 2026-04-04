@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A Genkit flow for generating stylized product images for drink variants.
@@ -51,22 +52,23 @@ const generateProductImageFlow = ai.defineFlow(
       promptParts.push({media: {url: input.referenceImageUri}});
     }
 
-    // Construct the text prompt
+    // Construct a high-fidelity text prompt for lifestyle shots
     promptParts.push(
-      `Create a square CTA product image for "${input.drinkName}".\n` +
-        `The background should be a bold ${input.drinkColor} with a smooth studio gradient, clean and minimal.\n` +
-        `${input.drinkDescription}\n` +
-        `Use a vibrant, pop-art aesthetic: bright colors, high contrast, slightly reflective can surface, clean edges.\n` +
-        `No Memphis patterns — keep it simple, bold, color-blocked.\n` +
-        `Overall mood: playful, modern, vibrant, clean.\n` +
-        `The image must be square.`
+      `Create a high-end, professional commercial product photograph for "${input.drinkName}".\n` +
+        `SCENE: A modern, minimalist lifestyle setting with soft studio lighting.\n` +
+        `COLOR THEME: Dominated by ${input.drinkColor} accents.\n` +
+        `PRODUCT: A sleek, condensation-covered aluminum soda can with clean branding.\n` +
+        `CONTEXT: ${input.drinkDescription}. The shot should feel refreshing, vibrant, and premium.\n` +
+        `STYLE: 8k resolution, photorealistic, shallow depth of field, sharp focus on the product, natural bokeh in the background.\n` +
+        `NO TEXT OVERLAYS, NO WATERMARKS, NO GRAPHIC LOGOS OTHER THAN THE PRODUCT BRANDING.\n` +
+        `The output must be a square image.`
     );
 
     const {media} = await ai.generate({
-      model: 'googleai/gemini-2.5-flash-image', // Using gemini-2.5-flash-image for potential image-to-image capabilities
+      model: 'googleai/gemini-2.5-flash-image',
       prompt: promptParts,
       config: {
-        responseModalities: ['TEXT', 'IMAGE'], // Always request both for this model
+        responseModalities: ['TEXT', 'IMAGE'],
       },
     });
 
@@ -74,7 +76,6 @@ const generateProductImageFlow = ai.defineFlow(
       throw new Error('Failed to generate product image: No media returned.');
     }
 
-    // The media object returned directly contains the URL for the image
     return {imageUrl: media.url!};
   }
 );
