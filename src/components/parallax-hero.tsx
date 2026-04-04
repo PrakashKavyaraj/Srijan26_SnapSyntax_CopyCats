@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -62,7 +63,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
       imagesRef.current = [];
       if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
     };
-  }, [activeVariant]);
+  }, [activeVariant, onNext]);
 
   const updateDrawProps = (imgWidth: number, imgHeight: number) => {
     const canvas = canvasRef.current;
@@ -108,6 +109,13 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     const animate = (currentTime: number) => {
       const elapsed = currentTime - startTime;
       const frameIndex = Math.floor(elapsed / interval);
+
+      // Auto-loop logic: When the sequence finishes one full rotation, switch variant
+      if (frameIndex >= activeVariant.frameCount) {
+        onNext();
+        return;
+      }
+
       renderFrame(frameIndex);
       frameIdRef.current = requestAnimationFrame(animate);
     };
@@ -116,7 +124,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     return () => {
       if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
     };
-  }, [loading, renderFrame]);
+  }, [loading, renderFrame, activeVariant.frameCount, onNext]);
 
   useEffect(() => {
     const resizeCanvas = () => {
