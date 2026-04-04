@@ -2,63 +2,101 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 const reviews = [
   {
-    name: "Alex Rivera",
-    role: "Health Enthusiast",
-    content: "The Cherry variant is a game changer. Tastes like childhood but without the sugar crash. I'm obsessed.",
+    name: "Rohit",
+    location: "Delhi",
+    content: "Honestly didn’t expect this to be so good! I usually drink regular cold drinks, but this tastes just as good and feels lighter. Definitely switching to this now.",
     rating: 5,
-    avatar: "https://i.pravatar.cc/150?u=1"
   },
   {
-    name: "Sarah Chen",
-    role: "Marathon Runner",
-    content: "Refreshing and light. It's the only soda I feel good about drinking after a long run. Lemon Ginger is my favorite!",
+    name: "Ananya",
+    location: "Mumbai",
+    content: "Perfect for Indian weather 🥵 Super refreshing in this heat! Plus knowing it’s healthier makes it even better.",
     rating: 5,
-    avatar: "https://i.pravatar.cc/150?u=2"
   },
   {
-    name: "James Wilson",
-    role: "Tech Professional",
-    content: "I've replaced my daily energy drink with FlavorVerse. The fiber content keeps me full and focused throughout the day.",
+    name: "Priya",
+    location: "Kolkata",
+    content: "Healthy bhi aur tasty bhi! Taste is really nice, not too sweet. Good option if you want to avoid too much sugar.",
     rating: 4,
-    avatar: "https://i.pravatar.cc/150?u=3"
+  },
+  {
+    name: "Aman",
+    location: "Bangalore",
+    content: "Gym ke baad best drink 💪 I’ve started having this after workouts. Light, refreshing, and no guilt.",
+    rating: 5,
+  },
+  {
+    name: "Karan",
+    location: "Chandigarh",
+    content: "Feels like soda, but better. Reminds me of classic soft drinks but without that heavy sugary feeling.",
+    rating: 4,
+  },
+  {
+    name: "Sneha",
+    location: "Pune",
+    content: "My parents also liked it! Even my parents who don’t like new drinks enjoyed this. That says a lot 😄",
+    rating: 5,
+  },
+  {
+    name: "Rahul",
+    location: "Hyderabad",
+    content: "Thoda expensive hai but worth it. A bit costly compared to normal soda, but quality and health benefits make up for it.",
+    rating: 4,
+  },
+  {
+    name: "Neha",
+    location: "Jaipur",
+    content: "Finally a guilt-free cold drink! I was trying to cut down sugar, and this is the perfect replacement.",
+    rating: 5,
   }
 ];
 
 export function ReviewsSection() {
   return (
-    <section id="reviews" className="py-24 px-6 md:px-24 bg-background">
-      <div className="text-center mb-16 space-y-4">
-        <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">Loved by <span className="text-accent">Thousands</span></h2>
-        <p className="text-muted-foreground">Join the community of flavor seekers.</p>
+    <section id="reviews" className="py-24 bg-background overflow-hidden">
+      <div className="text-center mb-16 space-y-4 px-6">
+        <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">
+          Loved by <span className="text-accent">Thousands</span>
+        </h2>
+        <p className="text-muted-foreground">Join the community of flavor seekers across India.</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8">
-        {reviews.map((review, i) => (
-          <div key={i} className="p-8 rounded-3xl bg-card border hover:border-accent transition-colors flex flex-col justify-between h-full">
-            <div className="space-y-4">
-              <div className="flex gap-1 text-accent">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <Star key={j} className={`w-4 h-4 ${j < review.rating ? 'fill-current' : 'text-muted-foreground'}`} />
-                ))}
+      <div className="relative flex overflow-hidden select-none py-8">
+        <div className="animate-marquee whitespace-nowrap flex gap-8 items-center">
+          {[...reviews, ...reviews].map((review, i) => (
+            <div 
+              key={i} 
+              className="inline-block w-[350px] md:w-[450px] p-8 rounded-3xl bg-card border border-white/5 hover:border-accent transition-colors duration-500 whitespace-normal"
+            >
+              <div className="space-y-4">
+                <div className="flex gap-1 text-accent">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star 
+                      key={j} 
+                      className={cn(
+                        "w-4 h-4",
+                        j < review.rating ? "fill-current" : "text-muted-foreground opacity-30"
+                      )} 
+                    />
+                  ))}
+                </div>
+                <p className="text-lg leading-relaxed font-medium text-foreground/90">
+                  "{review.content}"
+                </p>
+                <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                  <h4 className="font-bold text-sm tracking-tight">— {review.name}</h4>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    {review.location}
+                  </span>
+                </div>
               </div>
-              <p className="text-lg leading-relaxed italic text-foreground/80">"{review.content}"</p>
             </div>
-            <div className="flex items-center gap-4 mt-8 pt-6 border-t border-white/5">
-              <Avatar className="h-12 w-12 border-2 border-accent/20">
-                <AvatarImage src={review.avatar} alt={review.name} />
-                <AvatarFallback>{review.name[0]}</AvatarFallback>
-              </Avatar>
-              <div>
-                <h4 className="font-bold text-sm">{review.name}</h4>
-                <p className="text-xs text-muted-foreground font-mono uppercase tracking-widest">{review.role}</p>
-              </div>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </section>
   );
