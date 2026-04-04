@@ -39,11 +39,15 @@ export function ProductSection({ drink }: ProductSectionProps) {
         description: "Your custom lifestyle shot is ready.",
       });
     } catch (error: any) {
-      console.error("AI Generation failed:", error);
+      const errorMessage = error?.message || "";
+      const isQuotaError = errorMessage.includes("429") || errorMessage.toLowerCase().includes("quota");
+
       toast({
         variant: "destructive",
-        title: "Generation Failed",
-        description: "Please check your API key configuration in the .env file.",
+        title: isQuotaError ? "Rate Limit Reached" : "Generation Failed",
+        description: isQuotaError 
+          ? "You've exceeded your AI generation quota. Please wait a minute and try again."
+          : "An unexpected error occurred. Please check your API key configuration.",
       });
     } finally {
       setIsGenerating(false);
@@ -100,6 +104,7 @@ export function ProductSection({ drink }: ProductSectionProps) {
             fill
             className="object-cover transition-transform duration-1000 group-hover:scale-105"
             priority
+            data-ai-hint="product shot"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
           <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 right-6 md:right-10 text-white">
