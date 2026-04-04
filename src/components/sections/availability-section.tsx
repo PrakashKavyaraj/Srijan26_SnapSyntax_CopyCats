@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -9,7 +10,7 @@ const cities = [
 
 export function AvailabilitySection() {
   return (
-    <section className="py-24 bg-card relative overflow-hidden border-y border-white/5">
+    <section className="py-24 bg-card relative overflow-hidden border-y border-border">
       <div className="px-6 md:px-24 mb-16 relative z-10">
         <h2 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase leading-none">
           Now Flowing Across <span className="text-accent">India</span>
@@ -20,14 +21,14 @@ export function AvailabilitySection() {
       </div>
       
       {/* Infinite Marquee Animation */}
-      <div className="relative flex overflow-hidden select-none border-y border-white/5 py-4">
+      <div className="relative flex overflow-hidden select-none border-y border-border py-4">
         <div className="animate-marquee whitespace-nowrap flex gap-12 md:gap-24 items-center">
           {[...cities, ...cities, ...cities].map((city, i) => (
             <div 
               key={i} 
               className="flex items-center gap-12 md:gap-24"
             >
-              <span className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-white/60 transition-colors hover:text-accent duration-500 cursor-default">
+              <span className="text-2xl md:text-4xl font-black uppercase tracking-tighter text-foreground/40 transition-colors hover:text-accent duration-500 cursor-default">
                 {city}
               </span>
               <div className="w-2 h-2 md:w-3 md:h-3 rounded-full bg-accent" />
