@@ -1,5 +1,11 @@
-# Firebase Studio
+🥤 Olipop – Soft Drink Landing Page
 
-This is a NextJS starter in Firebase Studio.
+Olipop is a visually appealing and interactive landing page built to showcase a soft drink product with modern UI/UX design.
 
-To get started, take a look at src/app/page.tsx.
+The website focuses on:
+	•	Clean design
+	•	Smooth animations
+	•	Product storytelling
+	•	Conversion-focused layout
+
+Inspired by real-world healthy soda brands that emphasize low sugar and high fiber beverages  
