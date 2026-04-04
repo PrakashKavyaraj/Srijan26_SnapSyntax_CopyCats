@@ -59,8 +59,8 @@ export function ProductSection({ drink }: ProductSectionProps) {
       <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
         <div className="space-y-6 md:space-y-8">
           <div className="space-y-4">
-            <h2 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase leading-none">
-              A Modern Take on <span className="text-accent">Classic</span> Flavors.
+            <h2 className="text-4xl md:text-7xl font-bold tracking-tighter uppercase leading-none text-accent transition-colors duration-1000">
+              A Modern Take on Classic Flavors.
             </h2>
             <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-lg">
               Finally, a soda that's actually good for you. FlavorVerse combines the nostalgic taste you love with functional ingredients that support your digestive health.
@@ -69,11 +69,11 @@ export function ProductSection({ drink }: ProductSectionProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 md:p-6 rounded-2xl border bg-card/50">
-              <h4 className="text-2xl md:text-3xl font-bold text-accent">9g</h4>
+              <h4 className="text-2xl md:text-3xl font-bold text-accent transition-colors duration-1000">9g</h4>
               <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-widest font-medium">Plant Fiber</p>
             </div>
             <div className="p-4 md:p-6 rounded-2xl border bg-card/50">
-              <h4 className="text-2xl md:text-3xl font-bold text-accent">2g</h4>
+              <h4 className="text-2xl md:text-3xl font-bold text-accent transition-colors duration-1000">2g</h4>
               <p className="text-[10px] md:text-sm text-muted-foreground uppercase tracking-widest font-medium">Cane Sugar</p>
             </div>
           </div>
@@ -81,7 +81,7 @@ export function ProductSection({ drink }: ProductSectionProps) {
           <Button 
             onClick={handleGenerate} 
             disabled={isGenerating} 
-            className="w-full sm:w-auto rounded-full py-7 px-10 bg-accent text-white hover:opacity-90 transition-all font-bold tracking-widest uppercase shadow-xl hover:shadow-accent/20"
+            className="w-full sm:w-auto rounded-full py-7 px-10 bg-accent text-white hover:opacity-90 transition-all font-bold tracking-widest uppercase shadow-xl hover:shadow-accent/20 duration-1000"
           >
             {isGenerating ? (
               <>
@@ -109,7 +109,7 @@ export function ProductSection({ drink }: ProductSectionProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
           <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 right-6 md:right-10 text-white">
             <div className="flex items-center gap-2 mb-2">
-              <div className="px-2 py-0.5 rounded bg-accent/90 text-[10px] font-black tracking-widest uppercase">
+              <div className="px-2 py-0.5 rounded bg-accent/90 text-[10px] font-black tracking-widest uppercase transition-colors duration-1000">
                 {generatedImage ? 'AI Generated' : 'Reference Shot'}
               </div>
             </div>

@@ -150,7 +150,7 @@ export default function Home() {
                  <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               </div>
               <div className="order-1 md:order-2 space-y-8">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase leading-none text-accent transition-colors duration-500">
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase leading-none text-accent transition-colors duration-1000">
                   Rooted in Nature
                 </h2>
                 <p className="text-xl text-muted-foreground leading-relaxed">
@@ -164,8 +164,8 @@ export default function Home() {
                     "Non-GMO and Gluten-Free certified"
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-4 text-lg font-medium group cursor-default">
-                      <CheckCircle2 className="w-6 h-6 text-accent transition-colors duration-500" />
-                      <span className="group-hover:text-accent transition-colors">{item}</span>
+                      <CheckCircle2 className="w-6 h-6 text-accent transition-colors duration-1000" />
+                      <span className="group-hover:text-accent transition-colors duration-1000">{item}</span>
                     </div>
                   ))}
                 </div>
@@ -181,13 +181,13 @@ export default function Home() {
 
           <section id="faq" className="py-24 px-6 md:px-24 bg-secondary">
              <div className="max-w-4xl mx-auto">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-center mb-16 text-accent transition-colors duration-500">
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-center mb-16 text-accent transition-colors duration-1000">
                   Common Questions
                 </h2>
                 <Accordion type="single" collapsible className="space-y-4">
                   {faqs.map((faq, index) => (
-                    <AccordionItem key={index} value={`item-${index}`} className="border-2 rounded-2xl px-6 bg-background hover:border-accent transition-all duration-300">
-                      <AccordionTrigger className="text-lg font-bold text-left hover:text-accent hover:no-underline">{faq.question}</AccordionTrigger>
+                    <AccordionItem key={index} value={`item-${index}`} className="border-2 rounded-2xl px-6 bg-background hover:border-accent transition-all duration-500">
+                      <AccordionTrigger className="text-lg font-bold text-left hover:text-accent hover:no-underline transition-colors duration-1000">{faq.question}</AccordionTrigger>
                       <AccordionContent className="text-muted-foreground text-base pb-6">
                         {faq.answer}
                       </AccordionContent>

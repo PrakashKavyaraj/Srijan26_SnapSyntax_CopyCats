@@ -32,7 +32,7 @@ export function Navbar() {
       setScrolled(window.scrollY > 50);
 
       const sections = navLinks.map(link => document.querySelector(link.href));
-      const scrollPos = window.scrollY + 100;
+      const scrollPos = window.scrollY + 150;
 
       sections.forEach((section, i) => {
         if (section && (section as HTMLElement).offsetTop <= scrollPos && (section as HTMLElement).offsetTop + (section as HTMLElement).offsetHeight > scrollPos) {
@@ -52,22 +52,24 @@ export function Navbar() {
 
   return (
     <nav className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 md:px-6 py-4 flex items-center justify-between",
+      "fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-4 md:px-6 py-4 flex items-center justify-between",
       scrolled ? "bg-background/80 backdrop-blur-md border-b" : "bg-transparent"
     )}>
       <div className="flex items-center gap-2">
-        <span className="font-headline font-bold text-xl md:text-2xl tracking-tighter">FLAVORVERSE</span>
+        <span className="font-headline font-bold text-xl md:text-2xl tracking-tighter text-accent transition-colors duration-1000">FLAVORVERSE</span>
       </div>
 
-      {/* Desktop Links */}
+      {/* Desktop Links - All now use text-accent for the current active flavor */}
       <div className="hidden md:flex items-center gap-8">
         {navLinks.map((link) => (
           <a
             key={link.name}
             href={link.href}
             className={cn(
-              "text-sm font-medium uppercase tracking-widest transition-colors hover:text-accent",
-              activeSection === link.href ? "text-accent" : "text-foreground/60"
+              "text-sm font-black uppercase tracking-widest transition-all duration-1000",
+              activeSection === link.href 
+                ? "text-accent scale-110" 
+                : "text-accent/60 hover:text-accent hover:scale-105"
             )}
           >
             {link.name}
@@ -76,7 +78,7 @@ export function Navbar() {
       </div>
 
       <div className="flex items-center gap-2 md:gap-4">
-        <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full">
+        <Button variant="ghost" size="icon" onClick={toggleTheme} className="rounded-full hover:bg-accent/10 hover:text-accent transition-colors">
           {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </Button>
 
@@ -84,13 +86,13 @@ export function Navbar() {
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-accent/10 hover:text-accent transition-colors">
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="bg-background border-l w-[300px]">
               <SheetHeader className="text-left mb-8">
-                <SheetTitle className="font-headline font-bold text-2xl tracking-tighter text-accent">FLAVORVERSE</SheetTitle>
+                <SheetTitle className="font-headline font-bold text-2xl tracking-tighter text-accent transition-colors duration-1000">FLAVORVERSE</SheetTitle>
               </SheetHeader>
               <div className="flex flex-col gap-6">
                 {navLinks.map((link) => (
@@ -98,15 +100,15 @@ export function Navbar() {
                     key={link.name}
                     href={link.href}
                     className={cn(
-                      "text-lg font-bold uppercase tracking-widest transition-colors hover:text-accent",
-                      activeSection === link.href ? "text-accent" : "text-foreground/60"
+                      "text-lg font-black uppercase tracking-widest transition-all duration-1000",
+                      activeSection === link.href ? "text-accent" : "text-accent/40"
                     )}
                   >
                     {link.name}
                   </a>
                 ))}
                 <div className="pt-8 border-t">
-                  <Button className="w-full bg-accent text-white font-bold rounded-full py-6">SHOP NOW</Button>
+                  <Button className="w-full bg-accent text-white font-bold rounded-full py-6 transition-colors duration-1000">SHOP NOW</Button>
                 </div>
               </div>
             </SheetContent>
