@@ -68,8 +68,8 @@ export function ReviewsSection() {
   return (
     <section id="reviews" className="py-24 bg-background overflow-hidden">
       <div className="text-center mb-16 space-y-4 px-6">
-        <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">
-          Loved by <span className="text-accent">Thousands</span>
+        <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-accent transition-colors duration-500">
+          Loved by Thousands
         </h2>
         <p className="text-muted-foreground">Join the community of flavor seekers across India.</p>
       </div>

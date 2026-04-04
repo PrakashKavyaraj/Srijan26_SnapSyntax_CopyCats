@@ -150,7 +150,9 @@ export default function Home() {
                  <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               </div>
               <div className="order-1 md:order-2 space-y-8">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase leading-none">Rooted in <span className="text-accent transition-colors duration-500">Nature</span></h2>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase leading-none text-accent transition-colors duration-500">
+                  Rooted in Nature
+                </h2>
                 <p className="text-xl text-muted-foreground leading-relaxed">
                   We spent years working with leading microbiologists and digestive health experts to craft a functional soda that's actually good for you.
                 </p>
@@ -179,7 +181,9 @@ export default function Home() {
 
           <section id="faq" className="py-24 px-6 md:px-24 bg-secondary">
              <div className="max-w-4xl mx-auto">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-center mb-16">Common <span className="text-accent transition-colors duration-500">Questions</span></h2>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-center mb-16 text-accent transition-colors duration-500">
+                  Common Questions
+                </h2>
                 <Accordion type="single" collapsible className="space-y-4">
                   {faqs.map((faq, index) => (
                     <AccordionItem key={index} value={`item-${index}`} className="border-2 rounded-2xl px-6 bg-background hover:border-accent transition-all duration-300">

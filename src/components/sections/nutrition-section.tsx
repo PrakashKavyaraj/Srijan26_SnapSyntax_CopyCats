@@ -8,7 +8,9 @@ export function NutritionSection() {
     <section id="nutrition" className="py-24 px-6 md:px-24 bg-secondary">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-16 space-y-4">
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase">Nutrition <span className="text-accent">Facts</span></h2>
+          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter uppercase text-accent transition-colors duration-500">
+            Nutrition Facts
+          </h2>
           <p className="text-muted-foreground">Everything you need to know about what's inside.</p>
         </div>
 

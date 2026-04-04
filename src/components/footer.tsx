@@ -8,7 +8,9 @@ export function Footer() {
     <footer id="contact" className="bg-black text-white pt-24 pb-12 px-6 md:px-24 transition-colors duration-500">
       <div className="grid md:grid-cols-4 gap-12 mb-24">
         <div className="col-span-1 md:col-span-2 space-y-8">
-          <h2 className="text-4xl font-headline font-bold tracking-tighter">FLAVORVERSE</h2>
+          <h2 className="text-4xl font-headline font-bold tracking-tighter text-accent transition-colors duration-500">
+            FLAVORVERSE
+          </h2>
           <p className="text-white/40 max-w-xs leading-relaxed">
             Our functional soda is crafted with botanicals, plant fiber, and prebiotics to support your health without sacrificing the flavor you love.
           </p>
