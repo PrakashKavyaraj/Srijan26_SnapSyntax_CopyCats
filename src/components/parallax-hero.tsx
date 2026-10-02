@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DrinkVariant } from "@/types/drink";
 import { Button } from "@/components/ui/button";
-import { Twitter, Instagram, Facebook, ArrowUpRight, ArrowDown, ChevronUp, ChevronDown } from "lucide-react";
+import { Twitter, Instagram, Facebook, ArrowUpRight, ArrowDown, ChevronUp, ChevronDown, Sparkles } from "lucide-react";
 import { SodaCan3D } from "@/components/soda-can-3d";
+import { DrinkSpillOverlay } from "@/components/drink-spill-overlay";
 
 interface ParallaxHeroProps {
   activeVariant: DrinkVariant;
@@ -16,6 +17,12 @@ interface ParallaxHeroProps {
 
 export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: ParallaxHeroProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isSpilled, setIsSpilled] = useState(false);
+
+  // Reset spill when activeVariant changes
+  useEffect(() => {
+    setIsSpilled(false);
+  }, [activeVariant]);
 
   // Update theme colors when variant changes
   useEffect(() => {
@@ -25,23 +32,40 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
 
   return (
     <section ref={containerRef} className="hero-container relative h-screen overflow-hidden">
+      {/* Dynamic Fluid Spill Overlay Spreading Across Website */}
+      <DrinkSpillOverlay activeVariant={activeVariant} isSpilled={isSpilled} />
+
       {/* 3D Real-time Soda Can and Ambient Background */}
       <div className="absolute inset-0 z-0">
         <div className="canvas-wrapper bg-background transition-colors duration-1000 relative w-full h-full">
-          {/* Ambient Flavor Backlight Glow */}
+          {/* Ambient Flavor Backlight Glow - expands when spilled! */}
           <div 
-            className="absolute top-1/2 right-1/2 md:right-1/4 -translate-y-1/2 translate-x-1/2 md:translate-x-0 w-[350px] h-[350px] md:w-[650px] md:h-[650px] rounded-full blur-[140px] opacity-40 transition-colors duration-1000 pointer-events-none"
+            className={`absolute top-1/2 right-1/2 md:right-1/4 -translate-y-1/2 translate-x-1/2 md:translate-x-0 rounded-full blur-[140px] pointer-events-none transition-all duration-1000 ${
+              isSpilled 
+                ? "w-[600px] h-[600px] md:w-[1100px] md:h-[1100px] opacity-70 scale-125" 
+                : "w-[350px] h-[350px] md:w-[650px] md:h-[650px] opacity-40 scale-100"
+            }`}
             style={{ backgroundColor: `hsl(${activeVariant.themeColor})` }}
           />
 
           {/* Real-time 3D Soda Can Animation with Three.js */}
-          <SodaCan3D activeVariant={activeVariant} />
+          <SodaCan3D 
+            activeVariant={activeVariant} 
+            onSpill={() => setIsSpilled(true)} 
+          />
         </div>
       </div>
 
       {/* Hero Content Overlay */}
       <div className="relative z-20 h-full w-full pointer-events-none px-6 md:px-24 flex items-center">
         <div className="max-w-xl animate-fade-in-up pointer-events-auto">
+          {isSpilled && (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/20 border border-accent/40 text-accent text-xs font-mono font-bold uppercase tracking-wider mb-4 animate-bounce">
+              <Sparkles className="w-3.5 h-3.5" />
+              Drink Cracked & Flowing
+            </div>
+          )}
+
           <div className="mb-4">
              <h1 className="text-6xl md:text-[10rem] font-headline font-bold uppercase leading-[0.8] tracking-tighter text-foreground transition-colors duration-1000">
               {activeVariant.name}

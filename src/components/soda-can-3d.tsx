@@ -6,6 +6,7 @@ import { DrinkVariant } from "@/types/drink";
 
 interface SodaCan3DProps {
   activeVariant: DrinkVariant;
+  onSpill?: () => void;
 }
 
 // Generate realistic 2D canvas texture for the soda can label
@@ -151,14 +152,23 @@ function generateCanTexture(variant: DrinkVariant): THREE.CanvasTexture {
   return texture;
 }
 
-export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
+export function SodaCan3D({ activeVariant, onSpill }: SodaCan3DProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canGroupRef = useRef<THREE.Group | null>(null);
   const bodyMeshRef = useRef<THREE.Mesh | null>(null);
+  const tabMeshRef = useRef<THREE.Mesh | null>(null);
   const rimLightRef = useRef<THREE.PointLight | null>(null);
   const particleMaterialRef = useRef<THREE.PointsMaterial | null>(null);
+  const splashMaterialRef = useRef<THREE.PointsMaterial | null>(null);
+  const splashParticlesRef = useRef<THREE.Points | null>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const scrollRef = useRef(0);
+  const onSpillRef = useRef(onSpill);
+  const resetSpillRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    onSpillRef.current = onSpill;
+  }, [onSpill]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -211,6 +221,37 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
     canGroup.add(bodyMesh);
     bodyMeshRef.current = bodyMesh;
 
+    // 3D Condensation Droplets clinging to the can surface
+    const dropletCount = 140;
+    const dropletGeometry = new THREE.SphereGeometry(0.045, 10, 10);
+    dropletGeometry.scale(1, 1.25, 0.45);
+    const dropletMaterial = new THREE.MeshPhysicalMaterial({
+      color: 0xffffff,
+      roughness: 0.1,
+      metalness: 0.05,
+      transmission: 0.85,
+      ior: 1.33,
+      transparent: true,
+      opacity: 0.9,
+    });
+    const dropletMesh = new THREE.InstancedMesh(dropletGeometry, dropletMaterial, dropletCount);
+    const dummy = new THREE.Object3D();
+
+    for (let i = 0; i < dropletCount; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const y = (Math.random() - 0.5) * 3.1;
+      const radius = 1.215;
+      const scale = 0.55 + Math.random() * 0.95;
+
+      dummy.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+      dummy.rotation.y = -angle + Math.PI / 2;
+      dummy.scale.set(scale, scale, scale);
+      dummy.updateMatrix();
+      dropletMesh.setMatrixAt(i, dummy.matrix);
+    }
+    dropletMesh.instanceMatrix.needsUpdate = true;
+    canGroup.add(dropletMesh);
+
     // Top neck taper
     const topNeckGeometry = new THREE.CylinderGeometry(1.06, 1.2, 0.35, 64, 1, true);
     const topNeckMesh = new THREE.Mesh(topNeckGeometry, aluminumMaterial);
@@ -235,6 +276,7 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
     const tabMesh = new THREE.Mesh(tabGeometry, aluminumMaterial);
     tabMesh.position.set(0, 1.7 + 0.38, 0.2);
     canGroup.add(tabMesh);
+    tabMeshRef.current = tabMesh;
 
     // Bottom neck taper
     const bottomNeckGeometry = new THREE.CylinderGeometry(1.2, 1.04, 0.35, 64, 1, true);
@@ -305,7 +347,36 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
     scene.add(particles);
     particleMaterialRef.current = particleMaterial;
 
-    // 4. Lighting
+    // 4. 3D Erupting Liquid Splash Particles
+    const splashCount = 200;
+    const splashGeometry = new THREE.BufferGeometry();
+    const splashPositions = new Float32Array(splashCount * 3);
+    const splashVelocities: { x: number; y: number; z: number }[] = [];
+
+    for (let i = 0; i < splashCount; i++) {
+      splashPositions[i * 3] = 0;
+      splashPositions[i * 3 + 1] = 1.95;
+      splashPositions[i * 3 + 2] = 0.2;
+      splashVelocities.push({ x: 0, y: 0, z: 0 });
+    }
+    splashGeometry.setAttribute("position", new THREE.BufferAttribute(splashPositions, 3));
+
+    const splashMaterial = new THREE.PointsMaterial({
+      color: new THREE.Color(`hsl(${activeVariant.themeColor})`),
+      size: 0.24,
+      map: bubbleTexture,
+      transparent: true,
+      opacity: 0.9,
+      blending: THREE.NormalBlending,
+      depthWrite: false,
+    });
+    const splashParticles = new THREE.Points(splashGeometry, splashMaterial);
+    splashParticles.visible = false;
+    canGroup.add(splashParticles);
+    splashParticlesRef.current = splashParticles;
+    splashMaterialRef.current = splashMaterial;
+
+    // 5. Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.25);
     scene.add(ambientLight);
 
@@ -326,7 +397,35 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
     scene.add(rimLight);
     rimLightRef.current = rimLight;
 
-    // 5. Mouse and Scroll listeners
+    // 6. Rotation and Spill state tracking
+    let accumulatedAngle = 0;
+    let hasSpilled = false;
+    let splashActive = false;
+    const rotationSpeed = 0.9; // 1 full rotation takes ~7 seconds
+
+    resetSpillRef.current = () => {
+      accumulatedAngle = 0;
+      hasSpilled = false;
+      splashActive = false;
+      if (tabMeshRef.current) {
+        tabMeshRef.current.rotation.x = 0;
+        tabMeshRef.current.position.set(0, 1.7 + 0.38, 0.2);
+      }
+      if (splashParticlesRef.current) {
+        splashParticlesRef.current.visible = false;
+      }
+      const sPos = splashGeometry.attributes.position as THREE.BufferAttribute;
+      const sArr = sPos.array as Float32Array;
+      for (let i = 0; i < splashCount; i++) {
+        sArr[i * 3] = 0;
+        sArr[i * 3 + 1] = 1.95;
+        sArr[i * 3 + 2] = 0.2;
+        splashVelocities[i] = { x: 0, y: 0, z: 0 };
+      }
+      sPos.needsUpdate = true;
+    };
+
+    // 7. Mouse and Scroll listeners
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current.x = (e.clientX / window.innerWidth - 0.5) * 2;
       mouseRef.current.y = -(e.clientY / window.innerHeight - 0.5) * 2;
@@ -341,8 +440,7 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
       const width = container.clientWidth;
       const height = container.clientHeight;
       camera.aspect = width / height;
-      
-      // On mobile screens, center the can and zoom out slightly
+
       if (width < 768) {
         canGroup.position.set(0, -0.3, 0);
         camera.position.z = 9.2;
@@ -350,7 +448,7 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
         canGroup.position.set(1.4, -0.1, 0);
         camera.position.z = 8.2;
       }
-      
+
       camera.updateProjectionMatrix();
       renderer.setSize(width, height);
     };
@@ -360,37 +458,89 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
     window.addEventListener("resize", handleResize);
     handleResize();
 
-    // 6. Animation loop
+    // 8. Animation loop
     let animationFrameId: number;
     let clock = new THREE.Clock();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      const delta = clock.getDelta();
       const elapsedTime = clock.getElapsedTime();
 
+      // Track continuous rotation to detect 1 full 360-degree rotation (2*PI)
+      const frameRot = rotationSpeed * delta;
+      accumulatedAngle += frameRot;
+
+      if (accumulatedAngle >= Math.PI * 2 && !hasSpilled) {
+        hasSpilled = true;
+        splashActive = true;
+
+        // Pop pull tab
+        if (tabMeshRef.current) {
+          tabMeshRef.current.rotation.x = -0.6;
+          tabMeshRef.current.position.y += 0.08;
+        }
+
+        // Notify parent overlay to spill fluid across the website!
+        if (onSpillRef.current) {
+          onSpillRef.current();
+        }
+
+        // Launch explosive 3D liquid fountain out of the can
+        if (splashParticlesRef.current) {
+          splashParticlesRef.current.visible = true;
+        }
+        for (let i = 0; i < splashCount; i++) {
+          const theta = Math.random() * Math.PI * 2;
+          const radialSpeed = 1.0 + Math.random() * 3.5;
+          splashVelocities[i] = {
+            x: Math.cos(theta) * radialSpeed,
+            y: 4.0 + Math.random() * 4.5, // Erupt upwards!
+            z: 2.0 + Math.sin(theta) * radialSpeed, // Spray towards the screen!
+          };
+        }
+      }
+
+      // Update 3D splash droplets physics
+      if (splashActive) {
+        const sPos = splashGeometry.attributes.position as THREE.BufferAttribute;
+        const sArr = sPos.array as Float32Array;
+        for (let i = 0; i < splashCount; i++) {
+          sArr[i * 3] += splashVelocities[i].x * delta * 2.2;
+          sArr[i * 3 + 1] += splashVelocities[i].y * delta * 2.2;
+          sArr[i * 3 + 2] += splashVelocities[i].z * delta * 2.2;
+          // Gravity pulling liquid down
+          splashVelocities[i].y -= 8.5 * delta;
+        }
+        sPos.needsUpdate = true;
+      }
+
       // Continuous 360-degree rotation + scroll responsiveness
-      canGroup.rotation.y = elapsedTime * 0.75 + scrollRef.current * 0.003;
+      canGroup.rotation.y = elapsedTime * rotationSpeed + scrollRef.current * 0.003;
 
       // Gentle floating bob
-      const targetY = (container.clientWidth < 768 ? -0.3 : -0.1) + Math.sin(elapsedTime * 1.5) * 0.12;
+      const targetY =
+        (container.clientWidth < 768 ? -0.3 : -0.1) +
+        Math.sin(elapsedTime * 1.5) * 0.12;
       canGroup.position.y += (targetY - canGroup.position.y) * 0.05;
 
       // Interactive mouse parallax tilt
       const targetRotX = mouseRef.current.y * 0.18;
-      const targetRotZ = (container.clientWidth < 768 ? 0 : -0.06) - mouseRef.current.x * 0.18;
+      const targetRotZ =
+        (container.clientWidth < 768 ? 0 : -0.06) - mouseRef.current.x * 0.18;
       canGroup.rotation.x += (targetRotX - canGroup.rotation.x) * 0.05;
       canGroup.rotation.z += (targetRotZ - canGroup.rotation.z) * 0.05;
 
-      // Animate fizz bubbles
+      // Animate ambient fizz bubbles
       const posAttr = particleGeometry.attributes.position as THREE.BufferAttribute;
       const positions = posAttr.array as Float32Array;
       for (let i = 0; i < particleCount; i++) {
         positions[i * 3 + 1] += particleVelocities[i].y;
         positions[i * 3] += particleVelocities[i].x;
-        // Reset bubble when it floats too high
         if (positions[i * 3 + 1] > 3.0) {
           positions[i * 3 + 1] = -3.0;
-          positions[i * 3] = (Math.random() - 0.5) * 4.0 + canGroup.position.x;
+          positions[i * 3] =
+            (Math.random() - 0.5) * 4.0 + canGroup.position.x;
         }
       }
       posAttr.needsUpdate = true;
@@ -413,7 +563,7 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
     };
   }, []);
 
-  // Update texture, lighting, and particles when activeVariant changes
+  // Update texture, lighting, and reset spill when activeVariant changes
   useEffect(() => {
     if (bodyMeshRef.current) {
       const newTexture = generateCanTexture(activeVariant);
@@ -433,7 +583,16 @@ export function SodaCan3D({ activeVariant }: SodaCan3DProps) {
       particleMaterialRef.current.color.set(new THREE.Color(`hsl(${activeVariant.themeColor})`));
     }
 
-    // Energize rotation on flavor change for a smooth, dynamic transition
+    if (splashMaterialRef.current) {
+      splashMaterialRef.current.color.set(new THREE.Color(`hsl(${activeVariant.themeColor})`));
+    }
+
+    // Reset spill progress for new variant
+    if (resetSpillRef.current) {
+      resetSpillRef.current();
+    }
+
+    // Energize rotation on flavor change for a smooth transition
     if (canGroupRef.current) {
       canGroupRef.current.rotation.y += Math.PI * 0.75;
     }
