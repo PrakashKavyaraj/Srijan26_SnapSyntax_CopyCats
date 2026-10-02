@@ -45,7 +45,7 @@ const generateProductImageFlow = ai.defineFlow(
     outputSchema: GenerateProductImageOutputSchema,
   },
   async input => {
-    const promptParts: (string | {media: {url: string}})[] = [];
+    const promptParts: ({text: string} | {media: {url: string}})[] = [];
 
     // Add reference image if provided
     if (input.referenceImageUri) {
@@ -53,8 +53,9 @@ const generateProductImageFlow = ai.defineFlow(
     }
 
     // Construct a high-fidelity text prompt for lifestyle shots
-    promptParts.push(
-      `Create a high-end, professional commercial product photograph for "${input.drinkName}".\n` +
+    promptParts.push({
+      text:
+        `Create a high-end, professional commercial product photograph for "${input.drinkName}".\n` +
         `SCENE: A modern, minimalist lifestyle setting with soft studio lighting.\n` +
         `COLOR THEME: Dominated by ${input.drinkColor} accents.\n` +
         `PRODUCT: A sleek, condensation-covered aluminum soda can with clean branding.\n` +
@@ -62,7 +63,7 @@ const generateProductImageFlow = ai.defineFlow(
         `STYLE: 8k resolution, photorealistic, shallow depth of field, sharp focus on the product, natural bokeh in the background.\n` +
         `NO TEXT OVERLAYS, NO WATERMARKS, NO GRAPHIC LOGOS OTHER THAN THE PRODUCT BRANDING.\n` +
         `The output must be a square image.`
-    );
+    });
 
     const {media} = await ai.generate({
       model: 'googleai/gemini-2.5-flash-image',

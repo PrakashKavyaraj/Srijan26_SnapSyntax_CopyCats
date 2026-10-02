@@ -13,13 +13,22 @@ export function LoadingScreen({ progress, onFinished }: LoadingScreenProps) {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
+    // If progress reaches 100, smoothly finish
     if (progress >= 100) {
       const timer = setTimeout(() => {
         setShow(false);
         onFinished();
-      }, 800);
+      }, 400);
       return () => clearTimeout(timer);
     }
+
+    // Safety timeout: If loading takes longer than 1.5 seconds, force proceed
+    const forceTimer = setTimeout(() => {
+      setShow(false);
+      onFinished();
+    }, 1500);
+
+    return () => clearTimeout(forceTimer);
   }, [progress, onFinished]);
 
   if (!show) return null;

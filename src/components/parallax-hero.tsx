@@ -20,6 +20,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const frameIdRef = useRef<number>(0);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [hasFrames, setHasFrames] = useState(false);
 
   const drawPropsRef = useRef({
     offsetX: 0,
@@ -36,30 +37,47 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
 
   // Handle image sequence loading
   useEffect(() => {
+    let isCancelled = false;
     const images: HTMLImageElement[] = [];
     let loadedCount = 0;
     const base = activeVariant.sequencePath.replace('frame_0001.webp', '');
 
-    for (let i = 1; i <= activeVariant.frameCount; i++) {
-      const img = new Image();
-      const frameNum = i.toString().padStart(4, '0');
-      img.src = `${base}frame_${frameNum}.webp`;
-      
-      const onImageLoad = () => {
-        loadedCount++;
-        if (loadedCount === activeVariant.frameCount) {
-          if (isInitializing) setIsInitializing(false);
-          updateDrawProps(img.width, img.height);
-        }
-      };
+    // Probe first image before attempting to load all frames
+    const testImg = new Image();
+    testImg.src = activeVariant.sequencePath;
 
-      img.onload = onImageLoad;
-      img.onerror = onImageLoad;
-      images.push(img);
-    }
-    imagesRef.current = images;
+    testImg.onload = () => {
+      if (isCancelled) return;
+      for (let i = 1; i <= activeVariant.frameCount; i++) {
+        const img = new Image();
+        const frameNum = i.toString().padStart(4, '0');
+        img.src = `${base}frame_${frameNum}.webp`;
+        
+        const onImageLoad = () => {
+          if (isCancelled) return;
+          loadedCount++;
+          if (loadedCount === activeVariant.frameCount) {
+            setIsInitializing(false);
+            setHasFrames(true);
+            updateDrawProps(img.width, img.height);
+          }
+        };
+
+        img.onload = onImageLoad;
+        img.onerror = onImageLoad;
+        images.push(img);
+      }
+      imagesRef.current = images;
+    };
+
+    testImg.onerror = () => {
+      if (isCancelled) return;
+      setIsInitializing(false);
+      setHasFrames(false);
+    };
 
     return () => {
+      isCancelled = true;
       if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
     };
   }, [activeVariant]);
@@ -99,7 +117,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
   }, [activeVariant.frameCount]);
 
   useEffect(() => {
-    if (imagesRef.current.length === 0) return;
+    if (!hasFrames || imagesRef.current.length === 0) return;
 
     let startTime = performance.now();
     const fps = 30;
@@ -123,7 +141,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     return () => {
       if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
     };
-  }, [renderFrame, activeVariant.frameCount, onNext]);
+  }, [hasFrames, renderFrame, activeVariant.frameCount, onNext]);
 
   useEffect(() => {
     const resizeCanvas = () => {
@@ -153,8 +171,29 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
   return (
     <section ref={containerRef} className="hero-container relative h-screen overflow-hidden">
       <div className="absolute inset-0 z-0">
-        <div className="canvas-wrapper bg-background transition-colors duration-1000">
-          <canvas ref={canvasRef} className="block w-full h-full" />
+        <div className="canvas-wrapper bg-background transition-colors duration-1000 relative w-full h-full">
+          <canvas ref={canvasRef} className={`block w-full h-full ${hasFrames ? 'opacity-100' : 'opacity-0'}`} />
+
+          {!hasFrames && !isInitializing && (
+            <div className="absolute inset-0 flex items-center justify-center md:justify-end md:pr-28 pointer-events-none">
+              <div className="relative w-72 h-72 md:w-[480px] md:h-[480px] flex items-center justify-center">
+                {/* Ambient Backlight Glow matching flavor theme */}
+                <div 
+                  className="absolute inset-0 rounded-full blur-[100px] opacity-40 transition-all duration-1000 scale-125"
+                  style={{ backgroundColor: `hsl(${activeVariant.themeColor})` }}
+                />
+                {/* Fallback Product Visual */}
+                <div className="relative z-10 w-full h-full p-6 flex items-center justify-center">
+                  <img
+                    src={activeVariant.fallbackImage}
+                    alt={activeVariant.name}
+                    className="max-w-full max-h-full object-cover rounded-3xl shadow-2xl border-2 border-white/10 drop-shadow-[0_25px_40px_rgba(0,0,0,0.85)] transition-all duration-700 hover:scale-105"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {isInitializing && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />

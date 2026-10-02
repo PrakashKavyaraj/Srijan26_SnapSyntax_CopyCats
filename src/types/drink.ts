@@ -7,4 +7,5 @@ export type DrinkVariant = {
   themeColor: string; // HSL value for the accent
   sequencePath: string; // Base URL for the sequence
   frameCount: number;
+  fallbackImage: string;
 };

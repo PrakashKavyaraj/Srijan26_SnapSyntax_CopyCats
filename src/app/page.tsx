@@ -22,7 +22,8 @@ const variants: DrinkVariant[] = [
     description: "A modern take on a classic soda with a perfect blend of sweet and tart, full of nostalgic flavor.",
     themeColor: "350 78% 55%", // Cherry Red
     sequencePath: "https://omqaodalyvzbrvckcumi.supabase.co/storage/v1/object/public/assets/soda/frame_0001.webp",
-    frameCount: 200
+    frameCount: 200,
+    fallbackImage: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=1000&auto=format&fit=crop"
   },
   {
     id: "grape",
@@ -31,7 +32,8 @@ const variants: DrinkVariant[] = [
     description: "A functional soda inspired by classic flavors but made with better ingredients. Bold, juicy, and refined.",
     themeColor: "282 44% 47%", // Grape Purple
     sequencePath: "https://omqaodalyvzbrvckcumi.supabase.co/storage/v1/object/public/assets/soda2/frame_0001.webp",
-    frameCount: 200
+    frameCount: 200,
+    fallbackImage: "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1000&auto=format&fit=crop"
   },
   {
     id: "lemon",
@@ -40,7 +42,8 @@ const variants: DrinkVariant[] = [
     description: "Bright and refreshing citrus soda with natural lemon spark and crisp bubbles. A zingy functional delight.",
     themeColor: "45 93% 47%", // Lemon Yellow
     sequencePath: "https://omqaodalyvzbrvckcumi.supabase.co/storage/v1/object/public/assets/soda3/frame_0001.webp",
-    frameCount: 200
+    frameCount: 200,
+    fallbackImage: "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?q=80&w=1000&auto=format&fit=crop"
   }
 ];
 
@@ -93,27 +96,59 @@ export default function Home() {
   const [isPreloaded, setIsPreloaded] = useState(false);
   const activeVariant = variants[activeVariantIndex];
 
-  // Preload ALL sequences for ALL variants for seamless transitions
+  // Preload sequences if available, with safety timeout and fast probe
   useEffect(() => {
-    let totalFrames = variants.reduce((acc, v) => acc + v.frameCount, 0);
+    let isCancelled = false;
+    const totalFrames = variants.reduce((acc, v) => acc + v.frameCount, 0);
     let loaded = 0;
-    
-    variants.forEach(variant => {
-      const base = variant.sequencePath.replace('frame_0001.webp', '');
-      for (let i = 1; i <= variant.frameCount; i++) {
-        const img = new Image();
-        const frameNum = i.toString().padStart(4, '0');
-        img.src = `${base}frame_${frameNum}.webp`;
-        img.onload = () => {
-          loaded++;
-          setLoadProgress((loaded / totalFrames) * 100);
-        };
-        img.onerror = () => {
-          loaded++;
-          setLoadProgress((loaded / totalFrames) * 100);
-        };
+
+    // Safety timeout: Never keep the user waiting longer than 1200ms
+    const fallbackTimer = setTimeout(() => {
+      if (!isCancelled) {
+        setLoadProgress(100);
+        setIsPreloaded(true);
       }
-    });
+    }, 1200);
+
+    // Test first frame of first variant before trying to fetch all 600 frames
+    const testImg = new Image();
+    testImg.src = variants[0].sequencePath;
+
+    testImg.onload = () => {
+      if (isCancelled) return;
+      // Host is reachable! Preload all frames for smooth animations
+      variants.forEach(variant => {
+        const base = variant.sequencePath.replace('frame_0001.webp', '');
+        for (let i = 1; i <= variant.frameCount; i++) {
+          const img = new Image();
+          const frameNum = i.toString().padStart(4, '0');
+          img.src = `${base}frame_${frameNum}.webp`;
+          img.onload = () => {
+            if (isCancelled) return;
+            loaded++;
+            setLoadProgress((loaded / totalFrames) * 100);
+          };
+          img.onerror = () => {
+            if (isCancelled) return;
+            loaded++;
+            setLoadProgress((loaded / totalFrames) * 100);
+          };
+        }
+      });
+    };
+
+    testImg.onerror = () => {
+      // Host is unreachable / offline: immediately complete loading
+      if (!isCancelled) {
+        setLoadProgress(100);
+        setIsPreloaded(true);
+      }
+    };
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   const nextVariant = () => {
