@@ -1,10 +1,10 @@
-
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { DrinkVariant } from "@/types/drink";
 import { Button } from "@/components/ui/button";
 import { Twitter, Instagram, Facebook, ArrowUpRight, ArrowDown, ChevronUp, ChevronDown } from "lucide-react";
+import { SodaCan3D } from "@/components/soda-can-3d";
 
 interface ParallaxHeroProps {
   activeVariant: DrinkVariant;
@@ -15,19 +15,7 @@ interface ParallaxHeroProps {
 }
 
 export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: ParallaxHeroProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const imagesRef = useRef<HTMLImageElement[]>([]);
-  const frameIdRef = useRef<number>(0);
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [hasFrames, setHasFrames] = useState(false);
-
-  const drawPropsRef = useRef({
-    offsetX: 0,
-    offsetY: 0,
-    width: 0,
-    height: 0
-  });
 
   // Update theme colors when variant changes
   useEffect(() => {
@@ -35,173 +23,23 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
     document.documentElement.style.setProperty('--ring', activeVariant.themeColor);
   }, [activeVariant]);
 
-  // Handle image sequence loading
-  useEffect(() => {
-    let isCancelled = false;
-    const images: HTMLImageElement[] = [];
-    let loadedCount = 0;
-    const base = activeVariant.sequencePath.replace('frame_0001.webp', '');
-
-    // Probe first image before attempting to load all frames
-    const testImg = new Image();
-    testImg.src = activeVariant.sequencePath;
-
-    testImg.onload = () => {
-      if (isCancelled) return;
-      for (let i = 1; i <= activeVariant.frameCount; i++) {
-        const img = new Image();
-        const frameNum = i.toString().padStart(4, '0');
-        img.src = `${base}frame_${frameNum}.webp`;
-        
-        const onImageLoad = () => {
-          if (isCancelled) return;
-          loadedCount++;
-          if (loadedCount === activeVariant.frameCount) {
-            setIsInitializing(false);
-            setHasFrames(true);
-            updateDrawProps(img.width, img.height);
-          }
-        };
-
-        img.onload = onImageLoad;
-        img.onerror = onImageLoad;
-        images.push(img);
-      }
-      imagesRef.current = images;
-    };
-
-    testImg.onerror = () => {
-      if (isCancelled) return;
-      setIsInitializing(false);
-      setHasFrames(false);
-    };
-
-    return () => {
-      isCancelled = true;
-      if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
-    };
-  }, [activeVariant]);
-
-  const updateDrawProps = (imgWidth: number, imgHeight: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas || !imgWidth) return;
-
-    const hRatio = canvas.width / imgWidth;
-    const vRatio = canvas.height / imgHeight;
-    const ratio = Math.max(hRatio, vRatio);
-    
-    drawPropsRef.current = {
-      width: imgWidth * ratio,
-      height: imgHeight * ratio,
-      offsetX: (canvas.width - imgWidth * ratio) / 2,
-      offsetY: (canvas.height - imgHeight * ratio) / 2
-    };
-  };
-
-  const renderFrame = useCallback((frameIndex: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas || imagesRef.current.length === 0) return;
-    
-    const ctx = canvas.getContext("2d", { alpha: false });
-    if (!ctx) return;
-
-    const currentFrame = frameIndex % activeVariant.frameCount;
-    const img = imagesRef.current[currentFrame];
-    
-    if (img && img.complete && img.naturalWidth > 0) {
-      const { offsetX, offsetY, width, height } = drawPropsRef.current;
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, offsetX, offsetY, width, height);
-    }
-  }, [activeVariant.frameCount]);
-
-  useEffect(() => {
-    if (!hasFrames || imagesRef.current.length === 0) return;
-
-    let startTime = performance.now();
-    const fps = 30;
-    const interval = 1000 / fps;
-
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const frameIndex = Math.floor(elapsed / interval);
-
-      // Smooth Auto-loop logic: When rotation finishes, swap variant
-      if (frameIndex >= activeVariant.frameCount) {
-        onNext();
-        return;
-      }
-
-      renderFrame(frameIndex);
-      frameIdRef.current = requestAnimationFrame(animate);
-    };
-
-    frameIdRef.current = requestAnimationFrame(animate);
-    return () => {
-      if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
-    };
-  }, [hasFrames, renderFrame, activeVariant.frameCount, onNext]);
-
-  useEffect(() => {
-    const resizeCanvas = () => {
-      if (canvasRef.current) {
-        const dpr = window.devicePixelRatio || 1;
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        canvasRef.current.width = width * dpr;
-        canvasRef.current.height = height * dpr;
-        canvasRef.current.style.width = `${width}px`;
-        canvasRef.current.style.height = `${height}px`;
-        
-        if (imagesRef.current[0]) {
-          updateDrawProps(imagesRef.current[0].width, imagesRef.current[0].height);
-        }
-        
-        renderFrame(0);
-      }
-    };
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-    return () => window.removeEventListener("resize", resizeCanvas);
-  }, [renderFrame]);
-
   return (
     <section ref={containerRef} className="hero-container relative h-screen overflow-hidden">
+      {/* 3D Real-time Soda Can and Ambient Background */}
       <div className="absolute inset-0 z-0">
         <div className="canvas-wrapper bg-background transition-colors duration-1000 relative w-full h-full">
-          <canvas ref={canvasRef} className={`block w-full h-full ${hasFrames ? 'opacity-100' : 'opacity-0'}`} />
+          {/* Ambient Flavor Backlight Glow */}
+          <div 
+            className="absolute top-1/2 right-1/2 md:right-1/4 -translate-y-1/2 translate-x-1/2 md:translate-x-0 w-[350px] h-[350px] md:w-[650px] md:h-[650px] rounded-full blur-[140px] opacity-40 transition-colors duration-1000 pointer-events-none"
+            style={{ backgroundColor: `hsl(${activeVariant.themeColor})` }}
+          />
 
-          {!hasFrames && !isInitializing && (
-            <div className="absolute inset-0 flex items-center justify-center md:justify-end md:pr-28 pointer-events-none">
-              <div className="relative w-72 h-72 md:w-[480px] md:h-[480px] flex items-center justify-center">
-                {/* Ambient Backlight Glow matching flavor theme */}
-                <div 
-                  className="absolute inset-0 rounded-full blur-[100px] opacity-40 transition-all duration-1000 scale-125"
-                  style={{ backgroundColor: `hsl(${activeVariant.themeColor})` }}
-                />
-                {/* Fallback Product Visual */}
-                <div className="relative z-10 w-full h-full p-6 flex items-center justify-center">
-                  <img
-                    src={activeVariant.fallbackImage}
-                    alt={activeVariant.name}
-                    className="max-w-full max-h-full object-cover rounded-3xl shadow-2xl border-2 border-white/10 drop-shadow-[0_25px_40px_rgba(0,0,0,0.85)] transition-all duration-700 hover:scale-105"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {isInitializing && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-10">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent" />
-            </div>
-          )}
+          {/* Real-time 3D Soda Can Animation with Three.js */}
+          <SodaCan3D activeVariant={activeVariant} />
         </div>
       </div>
 
+      {/* Hero Content Overlay */}
       <div className="relative z-20 h-full w-full pointer-events-none px-6 md:px-24 flex items-center">
         <div className="max-w-xl animate-fade-in-up pointer-events-auto">
           <div className="mb-4">
@@ -228,6 +66,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         </div>
       </div>
 
+      {/* Side Navigation controls */}
       <div className="absolute right-4 md:right-16 top-1/2 -translate-y-1/2 z-30 flex flex-col items-center gap-6 md:gap-10">
         <div className="flex flex-col items-center">
           <span className="text-5xl md:text-9xl font-headline font-bold tabular-nums text-foreground/20 select-none tracking-tighter transition-colors duration-1000">
@@ -239,6 +78,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
            <button 
             onClick={onPrev}
             className="group flex flex-col items-center gap-1 transition-transform hover:-translate-y-1 active:scale-95 pointer-events-auto"
+            aria-label="Previous Flavor"
           >
             <span className="hidden md:block text-xs uppercase font-black tracking-[0.3em] text-foreground group-hover:text-accent transition-colors duration-1000">PREV</span>
             <ChevronUp className="w-6 h-6 md:w-8 md:h-8 text-foreground group-hover:text-accent transition-colors duration-1000 stroke-[3]" />
@@ -249,6 +89,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
           <button 
             onClick={onNext}
             className="group flex flex-col items-center gap-1 transition-transform hover:translate-y-1 active:scale-95 pointer-events-auto"
+            aria-label="Next Flavor"
           >
             <ChevronDown className="w-6 h-6 md:w-8 md:h-8 text-foreground group-hover:text-accent transition-colors duration-1000 stroke-[3]" />
             <span className="hidden md:block text-xs uppercase font-black tracking-[0.3em] text-foreground group-hover:text-accent transition-colors duration-1000">NEXT</span>
@@ -256,6 +97,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         </div>
       </div>
 
+      {/* Social Links */}
       <div className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 z-30 flex gap-6 md:gap-8">
         {[Twitter, Instagram, Facebook].map((Icon, i) => (
           <a key={i} href="#" className="text-foreground/40 hover:text-accent transition-colors duration-1000">
@@ -264,6 +106,7 @@ export function ParallaxHero({ activeVariant, index, total, onNext, onPrev }: Pa
         ))}
       </div>
 
+      {/* Scroll indicator */}
       <div className="absolute bottom-8 md:bottom-12 left-6 md:left-12 flex items-center gap-4 text-foreground/40 animate-bounce">
          <ArrowDown className="w-4 h-4 md:w-5 md:h-5" />
          <span className="text-[10px] md:text-xs uppercase font-bold tracking-widest">Scroll</span>
